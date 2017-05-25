@@ -9,7 +9,7 @@ import com.google.android.gms.maps.OnMapReadyCallback;
 import com.google.android.gms.maps.SupportMapFragment;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
-
+int a = 0;
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
 
     private GoogleMap mMap;
@@ -42,6 +42,23 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         LatLng van = new LatLng(49.2611813, -123.12541899999997);
         mMap.addMarker(new MarkerOptions().position(van).title("Born here"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(van));
-    }
 
+
+        LatLng here = new LatLng(49.2611813, -123.12541899999997);
+        mMap.addMarker(new MarkerOptions().position(here).title("You are here"));
+
+    }
+    public void switchView(GoogleMap googleMap) {
+        mMap = googleMap;
+
+        if(a==0) {
+            mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
+            a=1;
+
+        }
+        else {
+            mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
+            a=0;
+        }
+    }
 }
