@@ -3,6 +3,7 @@ package com.example.wango8311.myapplication;
 import android.*;
 import android.Manifest;
 import android.content.pm.PackageManager;
+import android.location.Location;
 import android.location.LocationManager;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
@@ -11,6 +12,7 @@ import android.util.Log;
 import android.view.View;
 import android.widget.Toast;
 
+import com.google.android.gms.location.LocationListener;
 import com.google.android.gms.maps.CameraUpdateFactory;
 import com.google.android.gms.maps.GoogleMap;
 import com.google.android.gms.maps.OnMapReadyCallback;
@@ -25,8 +27,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean isGPSenabled = false;
     private boolean isNetworkEnabled = false;
     private boolean canGetLocation = false;
-    private static final long MIN_TIME_BW_UPDATES = 1000*15;
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 15;
     private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 5f;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -65,77 +68,149 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             // to handle the case where the user grants the permission. See the documentation
             // for ActivityCompat#requestPermissions for more details.
             //return;
-            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION},2);
+            ActivityCompat.requestPermissions(this, new String[]{android.Manifest.permission.ACCESS_FINE_LOCATION}, 2);
         }
         if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
 
-            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION},2);
+            ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 2);
         }
         mMap.setMyLocationEnabled(true);
-
 
 
         LatLng g = new LatLng(57.401219, 93.519662);
         mMap.addMarker(new MarkerOptions().position(g).title("Welcome to Gulag, comrade"));
 
 
-
     }
+
     public void switchView(View v) {
 
 
-        if(a==0) {
+        if (a == 0) {
             mMap.setMapType(GoogleMap.MAP_TYPE_NORMAL);
-            a=1;
+            a = 1;
 
-        }
-        else {
+        } else {
             mMap.setMapType(GoogleMap.MAP_TYPE_SATELLITE);
-            a=0;
+            a = 0;
         }
     }
 
     public void getLocation() {
         try {
-            locationManager=(LocationManager) getSystemService(LOCATION_SERVICE);
+            locationManager = (LocationManager) getSystemService(LOCATION_SERVICE);
 
-            //get GPS status (make sure that russia hasn't nuked out satellites)
+            //get GPS status
             isGPSenabled = locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER);
-            if (isGPSenabled) Log.d ("MyMaps", "getLocation:GPS is enabrued");
+            if (isGPSenabled) Log.d("MyMaps", "getLocation:GPS is enabrued");
 
-            //get network status (make sure no EMP has occured)
+            //get network status
             isNetworkEnabled = locationManager.isProviderEnabled(LocationManager.NETWORK_PROVIDER);
-            if (isNetworkEnabled) Log.d ("MyMaps", "getLocation: network is enabrued");
+            if (isNetworkEnabled) Log.d("MyMaps", "getLocation: network is enabrued");
 
-            if(!isGPSenabled&&!isNetworkEnabled){
-                Log.d ("MyMaps", "getLocation: No provider is enabled!");
-            }  else{
+            if (!isGPSenabled && !isNetworkEnabled) {
+                Log.d("MyMaps", "getLocation: No provider is enabled!");
+            } else {
                 canGetLocation = true;
-                if(isGPSenabled){
-                    Log.d ("MyMaps", "getLocation: GPS enabled!-requesting location updates");
-                    LocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
-                        MIN_TIME_BW_UPDATES,
-                        MIN_DISTANCE_CHANGE_FOR_UPDATES,
-                        locationListenerGPS);
+                if (isGPSenabled) {
+                    Log.d("MyMaps", "getLocation: GPS enabled!-requesting location updates");
+                    if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return;
+                    }
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                            MIN_TIME_BW_UPDATES,
+                            MIN_DISTANCE_CHANGE_FOR_UPDATES,
+                            locationListenerGPS);
                     Log.d ("MyMaps", "getLocation: Network GPS update request success");
                     Toast.makeText(this, "Using GPS",Toast.LENGTH_SHORT);
 
                 }
                 if(isNetworkEnabled){
                     Log.d ("MyMaps", "getLocation: GPS enabled!-requesting location updates");
-                    LocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                             MIN_TIME_BW_UPDATES,
                             MIN_DISTANCE_CHANGE_FOR_UPDATES,
                             locationListenerNetwork);
                     Log.d ("MyMaps", "getLocation: Network GPS update request success");
                     Toast.makeText(this, "Using Network",Toast.LENGTH_SHORT);
 
+
+
                 }
             }
         }
         catch (Exception e){
-          Log.d("My maps",  "Caughtan exeption in get Location");
+          Log.d("My maps",  "Caught an exception in getLocation");
           e.printStackTrace();
         }
     }
+
+    private final android.location.LocationListener locationListenerGPS = new android.location.LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            //output message logd toast
+            Log.d ("MyMaps", "getLocation: Changed location pin GPS");
+            //drop marker with dropamarker
+
+            //disable network updates (use location magnaer)
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            //setup a switch statmunt on status
+
+            //case loc prvider avaoble
+
+            //LP oos reqruest update from np
+
+            //Lp temp unavbvail req update from np
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {
+        }
+
+        @Override
+        public void onProviderDisabled(String provider) {
+        }
+    };
+
+    private final android.location.LocationListener locationListenerNetwork = new android.location.LocationListener() {
+        @Override
+        public void onLocationChanged(Location location) {
+            //output message logd toast
+
+            //drop marker with dropamarker
+
+            //disable network updates (use location magnaer)
+        }
+
+        @Override
+        public void onStatusChanged(String provider, int status, Bundle extras) {
+            //setup a switch statmunt on status
+
+            //case loc prvider avaoble
+
+            //LP oos reqruest update from np
+
+            //Lp temp unavbvail req update from np
+        }
+
+        @Override
+        public void onProviderEnabled(String provider) {}
+
+        @Override
+        public void onProviderDisabled(String provider) {}
+    };
+
+
+
+
 }

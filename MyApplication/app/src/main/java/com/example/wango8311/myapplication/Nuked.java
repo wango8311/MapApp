@@ -6,9 +6,9 @@ import android.location.Location;
 /**
  * Created by wango8311 on 5/25/2017.
  */
-public class LocationManager {
+public class Nuked {
 
-        private final Context mContext;
+      /*  private final Context mContext;
 
         // flag for GPS status
         boolean isGPSEnabled = false;
@@ -34,5 +34,6 @@ public class LocationManager {
         public GPSTracker(Context context) {
             this.mContext = context;
             getLocation();
-        }
+
+        }*/
 }
