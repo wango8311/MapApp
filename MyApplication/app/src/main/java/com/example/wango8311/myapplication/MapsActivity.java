@@ -6,6 +6,7 @@ import android.content.pm.PackageManager;
 import android.graphics.Color;
 import android.location.Location;
 import android.location.LocationManager;
+import android.location.LocationProvider;
 import android.support.v4.app.ActivityCompat;
 import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
@@ -31,8 +32,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private boolean isGPSenabled = false;
     private boolean isNetworkEnabled = false;
     private boolean canGetLocation = false;
-    private static final long MIN_TIME_BW_UPDATES = 1000 * 15;
-    private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 5f;
+    private static final long MIN_TIME_BW_UPDATES = 1000 * 5;
+    private static final float MIN_DISTANCE_CHANGE_FOR_UPDATES = 5.0f;
     private LatLng here;
     private Location myLocation;
     private static final float MY_LOC_ZOOM_FACTOR = 17.0f;
@@ -65,7 +66,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         mMap.addMarker(new MarkerOptions().position(van).title("Born here"));
         mMap.moveCamera(CameraUpdateFactory.newLatLng(van));
 
-        if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+     /*  if (ActivityCompat.checkSelfPermission(this, android.Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
             // TODO: Consider calling
             //    ActivityCompat#requestPermissions
             // here to request the missing permissions, and then overriding
@@ -81,7 +82,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             ActivityCompat.requestPermissions(this, new String[]{Manifest.permission.ACCESS_COARSE_LOCATION}, 2);
         }
         mMap.setMyLocationEnabled(true);
-
+/*/
+        getLocation();
 
         LatLng g = new LatLng(57.401219, 93.519662);
         mMap.addMarker(new MarkerOptions().position(g).title("Welcome to Gulag, comrade"));
@@ -174,24 +176,36 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
         if (myLocation == null){
             //messgae in lod and toast
-
+            Log.d("My maps", "Location null");
         } else {
 
             here = new LatLng(myLocation.getLatitude(), myLocation.getLongitude());
             // dump coordiates
-
+            Log.d("Corodinates", "myLocation.getLatitude(), myLocation.getLongitude()");
             // Add a marker here and move camera
 
-            mMap.addMarker(new MarkerOptions().position(here).title("Born here"));
+           // mMap.addMarker(new MarkerOptions().position(here).title("here"));
             CameraUpdate update = CameraUpdateFactory.newLatLngZoom(here, MY_LOC_ZOOM_FACTOR);
             //Add shaoe fir marker
+            if (provider.equals(locationManager.GPS_PROVIDER)){
             Circle circle = mMap.addCircle(new CircleOptions()
                     .center(here)
-                    .radius (1)
+                    .radius (10)
                     .strokeColor(Color.RED)
                     .strokeWidth(2)
                     .fillColor(Color.RED));
             mMap.animateCamera(update);
+            }
+            else{
+                Circle circle = mMap.addCircle(new CircleOptions()
+                        .center(here)
+                        .radius (10)
+                        .strokeColor(Color.GREEN)
+                        .strokeWidth(2)
+                        .fillColor(Color.GREEN));
+                mMap.animateCamera(update);
+            }
+           // mMap.addMarker(new MarkerOptions().position(here).title("here"));
         }
     }
 
@@ -201,19 +215,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //output message logd toast
             Log.d ("MyMaps", "getLocation: Changed location pin GPS");
             //drop marker with dropamarker
-
+                dropMarker(locationManager.GPS_PROVIDER);
             //disable network updates (use location magnaer)
+            isNetworkEnabled=false;
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
             //setup a switch statmunt on status
+            switch (status) {
+                //case loc prvider avaoble
+                case LocationProvider.AVAILABLE:
+                    Log.d ("MyMaps", "Using location");
+                    break;
 
-            //case loc prvider avaoble
-
-            //LP oos reqruest update from np
-
-            //Lp temp unavbvail req update from np
+                //LP oos reqruest update from np
+                case LocationProvider.TEMPORARILY_UNAVAILABLE:
+                    isNetworkEnabled = true;
+                    break;
+                //Lp temp unavbvail req update from np
+                case LocationProvider.OUT_OF_SERVICE:
+                    isNetworkEnabled = true;
+                    break;
+                default:
+                    isNetworkEnabled = true;
+                    break;
+            }
         }
 
         @Override
@@ -229,16 +256,18 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         public void onLocationChanged(Location location) {
             //output message logd toast
-
+            Log.d ("MyMaps", "getLocation: Changed location pin network");
             //drop marker with dropamarker
+            dropMarker(locationManager.NETWORK_PROVIDER);
 
             //realucnh requar for netwok location updates requestlocationupdates NETWORK PROIDER
+            isNetworkEnabled=true;
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
             //setup a switch statmunt on status
-
+            Log.d ("MyMaps", "using netwrk");
             //case loc prvider avaoble
 
             //LP oos reqruest update from np
