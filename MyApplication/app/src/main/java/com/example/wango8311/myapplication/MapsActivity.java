@@ -37,6 +37,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng here;
     private Location myLocation;
     private static final float MY_LOC_ZOOM_FACTOR = 17.0f;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -174,7 +175,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             myLocation = locationManager.getLastKnownLocation(provider);
         }
 
-        if (myLocation == null){
+        if (myLocation == null) {
             //messgae in lod and toast
             Log.d("My maps", "Location null");
         } else {
@@ -184,40 +185,54 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             Log.d("Corodinates", "myLocation.getLatitude(), myLocation.getLongitude()");
             // Add a marker here and move camera
 
-           // mMap.addMarker(new MarkerOptions().position(here).title("here"));
+            // mMap.addMarker(new MarkerOptions().position(here).title("here"));
             CameraUpdate update = CameraUpdateFactory.newLatLngZoom(here, MY_LOC_ZOOM_FACTOR);
             //Add shaoe fir marker
-            if (provider.equals(locationManager.GPS_PROVIDER)){
-            Circle circle = mMap.addCircle(new CircleOptions()
-                    .center(here)
-                    .radius (10)
-                    .strokeColor(Color.RED)
-                    .strokeWidth(2)
-                    .fillColor(Color.RED));
-            mMap.animateCamera(update);
-            }
-            else{
+            if (provider.equals(locationManager.GPS_PROVIDER)) {
                 Circle circle = mMap.addCircle(new CircleOptions()
                         .center(here)
-                        .radius (10)
+                        .radius(10)
+                        .strokeColor(Color.RED)
+                        .strokeWidth(2)
+                        .fillColor(Color.RED));
+                mMap.animateCamera(update);
+            } else {
+                Circle circle = mMap.addCircle(new CircleOptions()
+                        .center(here)
+                        .radius(10)
                         .strokeColor(Color.GREEN)
                         .strokeWidth(2)
                         .fillColor(Color.GREEN));
                 mMap.animateCamera(update);
             }
-           // mMap.addMarker(new MarkerOptions().position(here).title("here"));
+            // mMap.addMarker(new MarkerOptions().position(here).title("here"));
         }
+    }
+
+    public void remove(){
+        mMap.clear();
     }
 
     private final android.location.LocationListener locationListenerGPS = new android.location.LocationListener() {
         @Override
         public void onLocationChanged(Location location) {
             //output message logd toast
-            Log.d ("MyMaps", "getLocation: Changed location pin GPS");
+            Log.d("MyMaps", "getLocation: Changed location pin GPS");
             //drop marker with dropamarker
-                dropMarker(locationManager.GPS_PROVIDER);
+            dropMarker(locationManager.GPS_PROVIDER);
             //disable network updates (use location magnaer)
-            isNetworkEnabled=false;
+            if (ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            locationManager.removeUpdates(locationListenerNetwork);
+
         }
 
         @Override
