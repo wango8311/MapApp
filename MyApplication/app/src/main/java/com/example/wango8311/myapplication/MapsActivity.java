@@ -4,6 +4,8 @@ import android.*;
 import android.Manifest;
 import android.content.pm.PackageManager;
 import android.graphics.Color;
+import android.location.Address;
+import android.location.Geocoder;
 import android.location.Location;
 import android.location.LocationManager;
 import android.location.LocationProvider;
@@ -12,6 +14,7 @@ import android.support.v4.app.FragmentActivity;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.View;
+import android.widget.EditText;
 import android.widget.Toast;
 
 import com.google.android.gms.location.LocationListener;
@@ -25,6 +28,9 @@ import com.google.android.gms.maps.model.CircleOptions;
 import com.google.android.gms.maps.model.LatLng;
 import com.google.android.gms.maps.model.MarkerOptions;
 
+import java.io.IOException;
+import java.util.List;
+
 public class MapsActivity extends FragmentActivity implements OnMapReadyCallback {
     int a = 0;
     private GoogleMap mMap;
@@ -37,6 +43,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng here;
     private Location myLocation;
     private static final float MY_LOC_ZOOM_FACTOR = 17.0f;
+    EditText search;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -46,6 +53,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         SupportMapFragment mapFragment = (SupportMapFragment) getSupportFragmentManager()
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
+        search = (EditText) findViewById(R.id.search);
     }
 
 
@@ -209,8 +217,56 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
     }
 
-    public void remove(){
+    public void remove(View v){
         mMap.clear();
+    }
+
+    public  void searchLoc(View v){
+        String src =  search.getText().toString();
+        Geocoder loc = new Geocoder(this);
+        List<Address> la  = null;
+        //LatLng he = new LatLng(0,0);
+        if (src.length()!=0) {
+            try {
+                la = loc.getFromLocationName(src,1000);
+
+            } catch (IOException e) {
+                Log.d("Search", "Caught an exception in SearchLoc (IO exception)");
+                e.printStackTrace();
+            } catch (IllegalArgumentException e) {
+                Log.d("Search", "Caught an exception in SearchLoc (Illegal Argument)");
+                e.printStackTrace();
+            }
+            //Toast.makeText(v.getContext(), search.getText(), Toast.LENGTH_LONG).show();
+        }
+        if (src.length()==0) {
+            Toast.makeText(v.getContext(),"no search parameter", Toast.LENGTH_LONG).show();
+        }
+        if (la!=null) {
+            try {
+                for (int i = 0; i < la.size(); i++) {
+                    //Latitude lat = la.get(i).getLatitude();
+                    //Long lng = la.get(i).getLongitude();
+
+                    LatLng he = new LatLng(la.get(i).getLatitude(), la.get(i).getLongitude());
+                    mMap.addMarker(new MarkerOptions().position(he).title(src));
+                /*Circle circle = mMap.addCircle(new CircleOptions()
+                        .center(he)
+                        .radius(10)
+                        .strokeColor(Color.BLUE)
+                        .strokeWidth(2)
+                        .fillColor(Color.BLUE));*/
+
+                }
+
+            } catch (IllegalArgumentException e) {
+                Log.d("Search", "Caught an exception in SearchLoc (Illegal Argument)");
+                e.printStackTrace();
+            }
+        }
+    if (la==null) {
+            Toast.makeText(v.getContext(),"no locations found", Toast.LENGTH_LONG).show();
+        }
     }
 
     private final android.location.LocationListener locationListenerGPS = new android.location.LocationListener() {
