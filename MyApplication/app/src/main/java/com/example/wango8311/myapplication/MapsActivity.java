@@ -43,6 +43,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     private LatLng here;
     private Location myLocation;
     private static final float MY_LOC_ZOOM_FACTOR = 17.0f;
+    private boolean track;
     EditText search;
 
     @Override
@@ -54,6 +55,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         search = (EditText) findViewById(R.id.search);
+        track=true;
     }
 
 
@@ -156,7 +158,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             MIN_DISTANCE_CHANGE_FOR_UPDATES,
                             locationListenerNetwork);
                     Log.d("MyMaps", "getLocation: Network GPS update request success");
-                    Toast.makeText(this, "Using Network", Toast.LENGTH_SHORT);
+                    Toast.makeText(this, "Using Network", Toast.LENGTH_SHORT).show();
 
 
                 }
@@ -166,9 +168,20 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             e.printStackTrace();
         }
     }
+    public void tracking(View v){
+        if (track==true){
+            track=false;
+            Toast.makeText(this, "Tracking disabled", Toast.LENGTH_SHORT).show();
 
+        }
+        else{
+            track=true;
+            Toast.makeText(this, "tracking enabled", Toast.LENGTH_SHORT).show();
+
+        }
+    }
     public void dropMarker(String provider) {
-
+        //if(track){
         if (locationManager != null) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
@@ -215,6 +228,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             // mMap.addMarker(new MarkerOptions().position(here).title("here"));
         }
+    //}
     }
 
     public void remove(View v){
@@ -222,13 +236,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public  void searchLoc(View v){
+        if (locationManager != null) {
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            myLocation = locationManager.getLastKnownLocation(locationManager.GPS_PROVIDER);
+
+        }
+        double hlat = myLocation.getLatitude();
+        double hlong = myLocation.getLongitude();
+        Toast.makeText(v.getContext(), hlat + hlong+ " ", Toast.LENGTH_LONG).show();
+        //double hlat=32.0;
+        //double hlong=-117.0;
         String src =  search.getText().toString();
         Geocoder loc = new Geocoder(this);
         List<Address> la  = null;
         //LatLng he = new LatLng(0,0);
         if (src.length()!=0) {
             try {
-                la = loc.getFromLocationName(src,1000);
+                la = loc.getFromLocationName(src,1000,hlat-.036,hlong-.036,hlat+.036,hlong+.036);
 
             } catch (IOException e) {
                 Log.d("Search", "Caught an exception in SearchLoc (IO exception)");
