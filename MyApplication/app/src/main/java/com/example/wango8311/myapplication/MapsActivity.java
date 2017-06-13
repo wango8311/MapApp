@@ -55,7 +55,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 .findFragmentById(R.id.map);
         mapFragment.getMapAsync(this);
         search = (EditText) findViewById(R.id.search);
-        track=true;
+        track = true;
     }
 
 
@@ -168,18 +168,19 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             e.printStackTrace();
         }
     }
-    public void tracking(View v){
-        if (track==true){
-            track=false;
+
+    public void tracking(View v) {
+        if (track == true) {
+            track = false;
             Toast.makeText(this, "Tracking disabled", Toast.LENGTH_SHORT).show();
 
-        }
-        else{
-            track=true;
+        } else {
+            track = true;
             Toast.makeText(this, "tracking enabled", Toast.LENGTH_SHORT).show();
 
         }
     }
+
     public void dropMarker(String provider) {
         //if(track){
         if (locationManager != null) {
@@ -228,14 +229,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             // mMap.addMarker(new MarkerOptions().position(here).title("here"));
         }
-    //}
+        //}
     }
 
-    public void remove(View v){
+    public void remove(View v) {
         mMap.clear();
     }
 
-    public  void searchLoc(View v){
+    public void searchLoc(View v) {
         if (locationManager != null) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
@@ -252,16 +253,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         }
         double hlat = myLocation.getLatitude();
         double hlong = myLocation.getLongitude();
-        Toast.makeText(v.getContext(), hlat + hlong+ " ", Toast.LENGTH_LONG).show();
+        Toast.makeText(v.getContext(), hlat + hlong + " ", Toast.LENGTH_LONG).show();
         //double hlat=32.0;
         //double hlong=-117.0;
-        String src =  search.getText().toString();
+        String src = search.getText().toString();
         Geocoder loc = new Geocoder(this);
-        List<Address> la  = null;
+        List<Address> la = null;
         //LatLng he = new LatLng(0,0);
-        if (src.length()!=0) {
+        if (src.length() != 0) {
             try {
-                la = loc.getFromLocationName(src,1000,hlat-.036,hlong-.036,hlat+.036,hlong+.036);
+                la = loc.getFromLocationName(src, 1000, hlat - .036, hlong - .036, hlat + .036, hlong + .036);
 
             } catch (IOException e) {
                 Log.d("Search", "Caught an exception in SearchLoc (IO exception)");
@@ -272,10 +273,10 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             //Toast.makeText(v.getContext(), search.getText(), Toast.LENGTH_LONG).show();
         }
-        if (src.length()==0) {
-            Toast.makeText(v.getContext(),"no search parameter", Toast.LENGTH_LONG).show();
+        if (src.length() == 0) {
+            Toast.makeText(v.getContext(), "no search parameter", Toast.LENGTH_LONG).show();
         }
-        if (la!=null) {
+        if (la != null) {
             try {
                 for (int i = 0; i < la.size(); i++) {
                     //Latitude lat = la.get(i).getLatitude();
@@ -297,8 +298,8 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 e.printStackTrace();
             }
         }
-    if (la==null) {
-            Toast.makeText(v.getContext(),"no locations found", Toast.LENGTH_LONG).show();
+        if (la == null) {
+            Toast.makeText(v.getContext(), "no locations found", Toast.LENGTH_LONG).show();
         }
     }
 
@@ -330,19 +331,32 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             switch (status) {
                 //case loc prvider avaoble
                 case LocationProvider.AVAILABLE:
-                    Log.d ("MyMaps", "Using location");
+                    Log.d("MyMaps", "Using location");
+                    if (ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                        // TODO: Consider calling
+                        //    ActivityCompat#requestPermissions
+                        // here to request the missing permissions, and then overriding
+                        //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                        //                                          int[] grantResults)
+                        // to handle the case where the user grants the permission. See the documentation
+                        // for ActivityCompat#requestPermissions for more details.
+                        return;
+                    }
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListenerNetwork);
                     break;
 
                 //LP oos reqruest update from np
                 case LocationProvider.TEMPORARILY_UNAVAILABLE:
-                    isNetworkEnabled = true;
+
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListenerNetwork);
+
                     break;
                 //Lp temp unavbvail req update from np
                 case LocationProvider.OUT_OF_SERVICE:
-                    isNetworkEnabled = true;
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListenerNetwork);
                     break;
                 default:
-                    isNetworkEnabled = true;
+                    locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListenerNetwork);
                     break;
             }
         }
@@ -360,12 +374,24 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
         @Override
         public void onLocationChanged(Location location) {
             //output message logd toast
-            Log.d ("MyMaps", "getLocation: Changed location pin network");
+            Log.d("MyMaps", "getLocation: Changed location pin network");
             //drop marker with dropamarker
             dropMarker(locationManager.NETWORK_PROVIDER);
 
             //realucnh requar for netwok location updates requestlocationupdates NETWORK PROIDER
-            isNetworkEnabled=true;
+            if (ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(MapsActivity.this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            locationManager.removeUpdates(locationListenerNetwork);
+
+            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListenerNetwork);
         }
 
         @Override
