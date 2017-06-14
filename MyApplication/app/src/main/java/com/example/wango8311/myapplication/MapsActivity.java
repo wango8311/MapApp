@@ -170,19 +170,34 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
     }
 
     public void tracking(View v) {
+
+
+
         if (track == true) {
             track = false;
             Toast.makeText(this, "Tracking disabled", Toast.LENGTH_SHORT).show();
-
+            if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
+                // TODO: Consider calling
+                //    ActivityCompat#requestPermissions
+                // here to request the missing permissions, and then overriding
+                //   public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                //                                          int[] grantResults)
+                // to handle the case where the user grants the permission. See the documentation
+                // for ActivityCompat#requestPermissions for more details.
+                return;
+            }
+            locationManager.removeUpdates(locationListenerNetwork);
+            locationManager.removeUpdates(locationListenerGPS);
         } else {
             track = true;
+            getLocation();
             Toast.makeText(this, "tracking enabled", Toast.LENGTH_SHORT).show();
 
         }
     }
 
     public void dropMarker(String provider) {
-        //if(track){
+
         if (locationManager != null) {
             if (ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_FINE_LOCATION) != PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(this, Manifest.permission.ACCESS_COARSE_LOCATION) != PackageManager.PERMISSION_GRANTED) {
                 // TODO: Consider calling
@@ -229,7 +244,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             }
             // mMap.addMarker(new MarkerOptions().position(here).title("here"));
         }
-        //}
+
     }
 
     public void remove(View v) {
@@ -389,9 +404,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
-            locationManager.removeUpdates(locationListenerNetwork);
+            //locationManager.removeUpdates(locationListenerNetwork);
 
-            locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListenerNetwork);
+            //locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListenerNetwork);
         }
 
         @Override
