@@ -148,7 +148,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             MIN_DISTANCE_CHANGE_FOR_UPDATES,
                             locationListenerGPS);
                     Log.d("MyMaps", "getLocation: Network GPS update request success");
-                    Toast.makeText(this, "Using GPS", Toast.LENGTH_SHORT);
+                   // Toast.makeText(this, "Using GPS", Toast.LENGTH_SHORT).show();
 
                 }
                 if (isNetworkEnabled) {
@@ -158,7 +158,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                             MIN_DISTANCE_CHANGE_FOR_UPDATES,
                             locationListenerNetwork);
                     Log.d("MyMaps", "getLocation: Network GPS update request success");
-                    Toast.makeText(this, "Using Network", Toast.LENGTH_SHORT).show();
+                  //  Toast.makeText(this, "Using Network", Toast.LENGTH_SHORT).show();
 
 
                 }
@@ -224,11 +224,12 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
 
             // mMap.addMarker(new MarkerOptions().position(here).title("here"));
             CameraUpdate update = CameraUpdateFactory.newLatLngZoom(here, MY_LOC_ZOOM_FACTOR);
+
             //Add shaoe fir marker
             if (provider.equals(locationManager.GPS_PROVIDER)) {
                 Circle circle = mMap.addCircle(new CircleOptions()
                         .center(here)
-                        .radius(10)
+                        .radius(5)
                         .strokeColor(Color.RED)
                         .strokeWidth(2)
                         .fillColor(Color.RED));
@@ -236,15 +237,16 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             } else {
                 Circle circle = mMap.addCircle(new CircleOptions()
                         .center(here)
-                        .radius(10)
+                        .radius(5)
                         .strokeColor(Color.GREEN)
                         .strokeWidth(2)
                         .fillColor(Color.GREEN));
                 mMap.animateCamera(update);
             }
             // mMap.addMarker(new MarkerOptions().position(here).title("here"));
-        }
 
+        }
+        getLocation();
     }
 
     public void remove(View v) {
@@ -336,13 +338,14 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                 // for ActivityCompat#requestPermissions for more details.
                 return;
             }
-            locationManager.removeUpdates(locationListenerNetwork);
+            //locationManager.removeUpdates(locationListenerNetwork);
 
         }
 
         @Override
         public void onStatusChanged(String provider, int status, Bundle extras) {
             //setup a switch statmunt on status
+            Toast.makeText(MapsActivity.this, "GPS OSC", Toast.LENGTH_SHORT).show();
             switch (status) {
                 //case loc prvider avaoble
                 case LocationProvider.AVAILABLE:
@@ -355,7 +358,9 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
                         //                                          int[] grantResults)
                         // to handle the case where the user grants the permission. See the documentation
                         // for ActivityCompat#requestPermissions for more details.
+                        Toast.makeText(MapsActivity.this, "Available RIP", Toast.LENGTH_SHORT).show();
                         return;
+
                     }
                     locationManager.requestLocationUpdates(LocationManager.NETWORK_PROVIDER, MIN_TIME_BW_UPDATES, MIN_DISTANCE_CHANGE_FOR_UPDATES, locationListenerNetwork);
                     break;
@@ -414,7 +419,7 @@ public class MapsActivity extends FragmentActivity implements OnMapReadyCallback
             //setup a switch statmunt on status
             Log.d ("MyMaps", "using netwrk");
             //case loc prvider avaoble
-
+            getLocation();
             //LP oos reqruest update from np
 
             //Lp temp unavbvail req update from np
